@@ -45,7 +45,7 @@ impl<'a> LogGenerator<'a> {
                     writeln!(
                         &mut log_content,
                         "{}{}",
-                        config.prefix, config.contents[content_idx]
+                        config.prefix, &config.contents[content_idx]
                     )
                     .unwrap();
                 }
@@ -53,7 +53,8 @@ impl<'a> LogGenerator<'a> {
 
             for i in 0..self.items_per_day {
                 let (hour, minute, activity) = if i == 0 {
-                    (6, self.rng.sample(minute_dist), "起床".to_string())
+                    // FIX 1: Cast the integer literal '6' to a u32 to match the 'else' branch.
+                    (6 as u32, self.rng.sample(minute_dist), "起床")
                 } else {
                     let progress_ratio = if self.items_per_day > 1 {
                         i as f64 / (self.items_per_day - 1) as f64
@@ -66,9 +67,11 @@ impl<'a> LogGenerator<'a> {
                     (
                         display_hour,
                         self.rng.sample(minute_dist),
-                        self.common_activities[activity_idx].clone(),
+                        // FIX 2: Explicitly convert the &String to a &str slice.
+                        &self.common_activities[activity_idx][..],
                     )
                 };
+
                 writeln!(
                     &mut log_content,
                     "{:02}{:02}{}",
