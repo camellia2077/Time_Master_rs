@@ -3,7 +3,7 @@ use colored::Colorize;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 mod config;
 mod log_generator;
@@ -19,7 +19,7 @@ fn main() -> Result<()> {
     let json_config = JsonConfigData::from_file("activities_config.json")?;
 
     // Phase 2: Execution & Output
-    let start_time = Instant::now();
+    let total_start_time = Instant::now();
     println!(
         "Generating data for years {} to {}...",
         config.start_year, config.end_year
@@ -34,6 +34,9 @@ fn main() -> Result<()> {
     let mut files_generated = 0;
     let master_dir = "Date";
 
+    let mut text_generation_duration = Duration::new(0, 0);
+    let mut io_duration = Duration::new(0, 0);
+
     // Create the master "Date" directory
     fs::create_dir_all(master_dir)?;
     println!("Created master directory: '{}'", master_dir);
@@ -47,18 +50,26 @@ fn main() -> Result<()> {
             let filename = format!("{}_{:02}.txt", year, month);
             let full_path = year_dir.join(filename);
 
-            let mut out_file = File::create(&full_path)
-                .map_err(|e| anyhow::anyhow!("Could not open file '{}' for writing: {}", full_path.display(), e))?;
-
+            // 1. Time the text generation
+            let gen_start = Instant::now();
             let days_in_month = utils::get_days_in_month(year, month);
             let month_log = generator.generate_for_month(month, days_in_month);
+            text_generation_duration += gen_start.elapsed();
+
+            // 2. Time the file I/O (creation and writing)
+            let io_start = Instant::now();
+            let mut out_file = File::create(&full_path)
+                .map_err(|e| anyhow::anyhow!("Could not open file '{}' for writing: {}", full_path.display(), e))?;
             out_file.write_all(month_log.as_bytes())?;
+            io_duration += io_start.elapsed();
+
             files_generated += 1;
         }
     }
 
     // Phase 3: Reporting
-    let duration = start_time.elapsed();
+    let total_duration = total_start_time.elapsed();
+
     println!(
         "\n{}",
         format!(
@@ -67,11 +78,24 @@ fn main() -> Result<()> {
         )
         .green()
     );
+
+    println!("---------------------------");
     println!(
-        "Total generation time: {:.3} s ({} ms).",
-        duration.as_secs_f64(),
-        duration.as_millis()
+        "total time:    {:.2} s ({}ms)",
+        total_duration.as_secs_f64(),
+        total_duration.as_millis()
     );
+    println!(
+        "text generate: {:.2} s ({}ms)",
+        text_generation_duration.as_secs_f64(),
+        text_generation_duration.as_millis()
+    );
+    println!(
+        "io:            {:.2} s ({}ms)",
+        io_duration.as_secs_f64(),
+        io_duration.as_millis()
+    );
+    println!("---------------------------");
 
     Ok(())
 }
