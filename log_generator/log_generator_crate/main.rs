@@ -7,10 +7,21 @@ use std::time::{Duration, Instant};
 
 mod config;
 mod log_generator;
-mod utils;
 
 use config::{Config, JsonConfigData};
 use log_generator::LogGenerator;
+
+fn is_leap(year: i32) -> bool {
+    (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+}
+
+fn get_days_in_month(year: i32, month: u32) -> u32 {
+    match month {
+        2 => if is_leap(year) { 29 } else { 28 },
+        4 | 6 | 9 | 11 => 30,
+        _ => 31,
+    }
+}
 
 fn main() -> Result<()> {
     let config = Config::from_args()?;
@@ -52,7 +63,7 @@ fn main() -> Result<()> {
 
             // 1. Time the text generation
             let gen_start = Instant::now();
-            let days_in_month = utils::get_days_in_month(year, month);
+            let days_in_month = get_days_in_month(year, month);
             let month_log = generator.generate_for_month(month, days_in_month);
             text_generation_duration += gen_start.elapsed();
 

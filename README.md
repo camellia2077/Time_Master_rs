@@ -9,8 +9,7 @@ log_generator/
 │   ├── Cargo.toml
 │   ├── config.rs # 读取json
 │   ├── log_generator.rs # log生成
-│   ├── main.rs
-│   └── utils.rs
+│   └── main.rs
 ├── Cargo.toml
 └── run_benchmarks.py
 ```
