@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "log_generator_crate", # Points to the subdirectory with your crate
+]
+
+[profile.release] # Profile settings can stay at the root
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
