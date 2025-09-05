@@ -25,10 +25,14 @@ impl<'a> LogGenerator<'a> {
         }
     }
 
-    pub fn generate_for_month(&mut self, month: u32, days_in_month: u32) -> String {
+    // [修改] 函数签名新增 year 参数
+    pub fn generate_for_month(&mut self, year: i32, month: u32, days_in_month: u32) -> String {
         let mut log_content = String::new();
         let minute_dist = Uniform::from(0..=59);
         let activity_dist = Uniform::from(0..self.common_activities.len());
+
+        // [核心修改] 在文件最开始处添加年份信息
+        writeln!(&mut log_content, "y{}\n", year).unwrap();
 
         for day in 1..=days_in_month {
             if day > 1 {
@@ -53,7 +57,6 @@ impl<'a> LogGenerator<'a> {
 
             for i in 0..self.items_per_day {
                 let (hour, minute, activity) = if i == 0 {
-                    // FIX 1: Cast the integer literal '6' to a u32 to match the 'else' branch.
                     (6 as u32, self.rng.sample(minute_dist), "起床")
                 } else {
                     let progress_ratio = if self.items_per_day > 1 {
@@ -67,7 +70,6 @@ impl<'a> LogGenerator<'a> {
                     (
                         display_hour,
                         self.rng.sample(minute_dist),
-                        // FIX 2: Explicitly convert the &String to a &str slice.
                         &self.common_activities[activity_idx][..],
                     )
                 };

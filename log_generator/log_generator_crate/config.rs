@@ -6,12 +6,12 @@ use std::fs;
 use std::path::Path;
 
 #[derive(Parser, Debug)]
-#[command(author, version="2.2.0", about, long_about = None)]
+#[command(author, version="0.2.0", about, long_about = None)]
 #[command(override_usage = format!("{} <START_YEAR> <END_YEAR> <ITEMS_PER_DAY>", "rust_log_generator".bright_yellow()))]
 pub struct Config {
     #[arg(help = "The starting year (e.g., 1990)")]
     pub start_year: i32,
-    #[arg(help = "The ending year (inclusive)")]
+    #[arg(help = "The ending year (e.g., 2000)")]
     pub end_year: i32,
     #[arg(help = "Number of log items per day (positive integer)")]
     pub items_per_day: u32,

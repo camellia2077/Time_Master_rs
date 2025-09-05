@@ -55,7 +55,9 @@ fn main() -> Result<()> {
     for year in config.start_year..=config.end_year {
         let year_dir = Path::new(master_dir).join(year.to_string());
         fs::create_dir_all(&year_dir)?;
-        println!("Created directory: '{}'", year_dir.display());
+        
+        // [修改] 移除此处的重复打印，让流程更简洁
+        // println!("Created directory: '{}'", year_dir.display());
 
         for month in 1..=12 {
             let filename = format!("{}_{:02}.txt", year, month);
@@ -64,7 +66,8 @@ fn main() -> Result<()> {
             // 1. Time the text generation
             let gen_start = Instant::now();
             let days_in_month = get_days_in_month(year, month);
-            let month_log = generator.generate_for_month(month, days_in_month);
+            // [修改] 调用 generate_for_month 时传入当前的 'year'
+            let month_log = generator.generate_for_month(year, month, days_in_month);
             text_generation_duration += gen_start.elapsed();
 
             // 2. Time the file I/O (creation and writing)
