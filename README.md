@@ -1,5 +1,5 @@
 # Time_Master_rs
-rust重写时间管理工具
+rust重写时间管理工具,现在只实现了log自动生成工具
 
 # 结构
 ```
